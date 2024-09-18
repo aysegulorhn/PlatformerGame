@@ -1,36 +1,31 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
+
 [RequireComponent(typeof(Rigidbody2D))]
-public class player : MonoBehaviour
+public class Player : MonoBehaviour
 {
-    //Rigidbody2D
     Rigidbody2D body2D;
-    //Bu var'lar karakterin hızını ve zıplamasını belirler
-    [Tooltip("Karakterin ne kadar hızlı gideceğini belirler.")]
+
+    [Tooltip("Karakterin ne kadar hÄ±zlÄ± gideceÄŸini belirler.")]
     [Range(0, 20)]
     public float playerSpeed;
-    
-    //Zıplama
-    [Tooltip("Karakterin ne kadar yükseğe zıplayacağını belirler.")]
-    [Range(0, 1500)]
-    public float jumpPower;
 
-    [Tooltip("Karakterin 2. zıplamada ne kadar yükseğe zıplayacağını belirler.")]
-    [Range(0, 30)]
-    public float doubleJumpPower;
-   internal bool canDoubleJump;
+    [Tooltip("Karakterin ne kadar yÃ¼kseÄŸe zÄ±playacaÄŸÄ±nÄ± belirler.")]
+    [Range(0, 5)]
+    public float jumpHeight = 3f;
 
-    //Karakteri döndürme
+    [Tooltip("ZÄ±plama sÃ¼resi")]
+    public float jumpDuration = 0.5f;
+
+    internal bool canDoubleJump;
+
     bool facingRight = true;
 
-    //Yeri bulma
-    [Tooltip("Karakterin yere değip değmediğini kontrol eder.")]
-    public bool isGrounded = true;
-    Transform groundCheck;
-    const float GrounCheckRadius = 0.2f;
-    [Tooltip("Yerin ne olduğunu belirler")]
+    [Tooltip("Karakterin yere deÄŸip deÄŸmediÄŸini kontrol eder.")]
+    public bool isGrounded = false;
+
+    [Tooltip("Yerin ne olduÄŸunu belirler")]
     public LayerMask groundLayer;
 
     void Start()
@@ -38,40 +33,42 @@ public class player : MonoBehaviour
         body2D = GetComponent<Rigidbody2D>();
         body2D.gravityScale = 5;
         body2D.freezeRotation = true;
-        body2D.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-        //Grouncheki bulma
-        groundCheck = transform.Find("GroundCheck");
     }
-    
 
-
-    // Framerateden bağımsız olarak çalışır.Fizik ile ilgili kodları buraya yazınız.
     void FixedUpdate()
-    { 
-        //Yere değiyor muyuz diye kontrol eder
-        //isGrounded = Physics2D.OverlapCircle(groundCheck.position, GrounCheckRadius, groundLayer);
-        //Haraket etme
+    {
+        // Hareket etme
         float h = Input.GetAxis("Horizontal");
         body2D.velocity = new Vector2(h * playerSpeed, body2D.velocity.y);
 
         Flip(h);
     }
-   public void Jump()
-    {
-        //Rigidbody ye dikey yönde  güç ekle
-        body2D.AddForce(new Vector2(0, jumpPower));
-        Console.WriteLine("Jump Function");
 
-    } 
+    public void Jump()
+    {
+        if (isGrounded)
+        {
+            // ZÄ±plama hareketini DoTween ile yap
+            transform.DOMoveY(transform.position.y + jumpHeight, jumpDuration)
+                .OnComplete(() => isGrounded = false); // ZÄ±plama tamamlandÄ±ÄŸÄ±nda isGrounded'Ä± false yap
+            canDoubleJump = true;
+            Debug.Log("Jump Function Called");
+        }
+    }
+
     public void DoubleJump()
     {
-        //Rigidbody ye dikey yönde ani bir güç ekle
-        body2D.AddForce(new Vector2(0, doubleJumpPower),ForceMode2D.Impulse);
-        Console.WriteLine("Double Jump Function");
+        if (canDoubleJump)
+        {
+            transform.DOMoveY(transform.position.y + jumpHeight, jumpDuration)
+                .OnComplete(() => canDoubleJump = false);
+            Debug.Log("Double Jump Function Called");
+        }
     }
+
     void Flip(float h)
     {
-        if(h>0 && !facingRight || h<0 && facingRight)
+        if (h > 0 && !facingRight || h < 0 && facingRight)
         {
             facingRight = !facingRight;
             Vector2 theScale = transform.localScale;
@@ -80,5 +77,21 @@ public class player : MonoBehaviour
         }
     }
 
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (((1 << collision.gameObject.layer) & groundLayer) != 0)
+        {
+            isGrounded = true;
+            Debug.Log("Grounded");
+        }
+    }
 
+    void OnCollisionExit2D(Collision2D collision)
+    {
+        if (((1 << collision.gameObject.layer) & groundLayer) != 0)
+        {
+            isGrounded = false;
+            Debug.Log("Not Grounded");
+        }
+    }
 }

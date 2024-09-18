@@ -8,13 +8,13 @@ TagManager:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Sky
   - Water
   - UI
   - Ground
-  - player
-  - cloud
-  - step
+  - Player
+  - Cloud
+  - Step
   - 
   - 
   - 

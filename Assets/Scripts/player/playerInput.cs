@@ -1,35 +1,26 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class playerinput : MonoBehaviour
+public class PlayerInput : MonoBehaviour
 {
-    player player;
+    public Player player;
 
-    
-    void Start()
-    {
-       player = GetComponent<player>();
-        
-    }
     void Update()
     {
-        // Eðer zýplama butonuna basarsak ve yere deðiyorsak zýplama fonksiyonu çaðýr
+        // EÄŸer zÄ±plama butonuna basarsak, zÄ±plama veya double jump iÅŸlemini gerÃ§ekleÅŸtir
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Console.WriteLine("Jump Update");
-            player.Jump();
-            player.canDoubleJump = true;
-            Console.WriteLine("Jump Update");
-        }
-        // Eðer zýplama butonuna basarsak ve yere deðmiyorsak ve double jump yapabiliyorsak double jump yap
-        else if (Input.GetKeyDown(KeyCode.Space) && !player.isGrounded && player.canDoubleJump)
-        {
-            player.DoubleJump();
-            player.canDoubleJump = false;
-            Console.WriteLine("Double Jump Update");
+            if (player.isGrounded)
+            {
+                Debug.Log("Jump Update");
+                player.Jump();
+                player.canDoubleJump = true;
+            }
+            else if (player.canDoubleJump)
+            {
+                Debug.Log("Double Jump Update");
+                player.DoubleJump();
+                player.canDoubleJump = false;
+            }
         }
     }
-
 }
