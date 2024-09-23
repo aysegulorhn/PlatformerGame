@@ -28,13 +28,22 @@ public class Player : MonoBehaviour
     [Tooltip("Yerin ne olduğunu belirler")]
     public LayerMask groundLayer;
 
+    //Animator controller kısmı
+    Animator AnimController;
+
+
+
     void Start()
     {
         body2D = GetComponent<Rigidbody2D>();
         body2D.gravityScale = 5;
         body2D.freezeRotation = true;
+        AnimController = GetComponent<Animator>();
     }
-
+    private void Update()
+    {
+        UpdateAnimations();
+    }
     void FixedUpdate()
     {
         // Hareket etme
@@ -93,5 +102,13 @@ public class Player : MonoBehaviour
             isGrounded = false;
             Debug.Log("Not Grounded");
         }
+    }
+
+    private void UpdateAnimations()
+    {
+        AnimController.SetFloat("VelocityX", Mathf.Abs(body2D.velocity.x));
+        AnimController.SetBool("isGrounded", isGrounded);
+        AnimController.SetFloat("VelocityY", body2D.velocity.y);
+
     }
 }
