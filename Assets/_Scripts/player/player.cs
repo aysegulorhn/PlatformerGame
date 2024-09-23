@@ -31,7 +31,11 @@ public class Player : MonoBehaviour
     //Animator controller kısmı
     Animator AnimController;
 
-
+    
+    internal int maxPlayerhealth=100;
+    public int currentPlayerHealth;
+    internal bool isHurt;
+    GiveDamage giveDamage;
 
     void Start()
     {
@@ -39,10 +43,17 @@ public class Player : MonoBehaviour
         body2D.gravityScale = 5;
         body2D.freezeRotation = true;
         AnimController = GetComponent<Animator>();
+        currentPlayerHealth = maxPlayerhealth;
+        giveDamage=FindObjectOfType<GiveDamage>();
     }
     private void Update()
     {
+        //canımız max canımıza eşitse canımızı max cana eşitle
         UpdateAnimations();
+        ReduceHealth();
+        if (currentPlayerHealth > maxPlayerhealth)
+            currentPlayerHealth = maxPlayerhealth;
+       
     }
     void FixedUpdate()
     {
@@ -109,6 +120,17 @@ public class Player : MonoBehaviour
         AnimController.SetFloat("VelocityX", Mathf.Abs(body2D.velocity.x));
         AnimController.SetBool("isGrounded", isGrounded);
         AnimController.SetFloat("VelocityY", body2D.velocity.y);
+        if (isHurt)
+            AnimController.SetTrigger("isHurt");
 
+    }
+    void ReduceHealth()
+    {
+        if (isHurt)
+        {
+            currentPlayerHealth -= giveDamage.damage;
+            isHurt = false;
+
+        }
     }
 }
